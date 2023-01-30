@@ -3,7 +3,6 @@ package com.marketboro.savings.controller;
 import com.marketboro.savings.dto.SavingsSaveDto;
 import com.marketboro.savings.dto.SavingsSumDto;
 import com.marketboro.savings.dto.common.ApiResponse;
-import com.marketboro.savings.enums.common.SuccessCode;
 import com.marketboro.savings.service.SavingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +18,7 @@ public class SavingsController {
      */
     @GetMapping("/{userNumber}")
     public ApiResponse<SavingsSumDto.Response> getSavingsSum(@PathVariable String userNumber){
-        return ApiResponse
-                .<SavingsSumDto.Response>builder()
-                .code(SuccessCode.S)
-                .message(SuccessCode.S.getMsg())
-                .data(savingsService.findSavingsSum(userNumber))
-                .build();
+        return ApiResponse.createSuccessResponse(savingsService.findSavingsSum(userNumber));
     }
     /**
      * 회원별 적립금 적립/사용 내역 조회
@@ -38,12 +32,7 @@ public class SavingsController {
      * */
     @PostMapping("/save")
     public ApiResponse<SavingsSaveDto.Response> save(@RequestBody SavingsSaveDto.Request request){
-        return ApiResponse
-                .<SavingsSaveDto.Response>builder()
-                .code(SuccessCode.S)
-                .message(SuccessCode.S.getMsg())
-                .data(savingsService.save(request))
-                .build();
+        return ApiResponse.createSuccessResponse(savingsService.save(request));
     }
     /**
      * 회원별 적립금 사용

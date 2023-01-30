@@ -12,10 +12,6 @@ public class RestControllerAdvisor {
     public ApiResponse SavingsMinusExceptions(SavingsMinusException e){
         String message = e.getMessage();
 
-        return ApiResponse
-                .builder()
-                .code(SuccessCode.F)
-                .message(message)
-                .build();
+        return ApiResponse.createErrorResponse(message);
     }
 }
