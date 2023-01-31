@@ -10,6 +10,7 @@ public class SavingsSaveDto {
     public static class Request{
         private String userNumber;
         private BigDecimal saveSavings;
+        private String remarks;
     }
     @Getter
     @Builder

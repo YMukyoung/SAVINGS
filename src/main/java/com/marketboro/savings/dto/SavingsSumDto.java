@@ -12,5 +12,12 @@ public class SavingsSumDto {
     @Builder
     public static class Response {
         private BigDecimal totalSavings;
+
+        public static Response createResponse(BigDecimal totalSavings){
+            return Response
+                    .builder()
+                    .totalSavings(totalSavings)
+                    .build();
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.marketboro.savings.enums.SavingsStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "SAVINGS")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicUpdate
 public class Savings {
     @Id
     @Column(name = "IDX")
@@ -28,6 +30,8 @@ public class Savings {
     @Column(name = "STATUS", columnDefinition = "Character", nullable = false)
     @Enumerated(EnumType.STRING)
     private SavingsStatus status;
+    @Column(name = "REMARKS")
+    private String remarks;
     @CreationTimestamp
     @Column(name = "REG_DATE", nullable = false)
     private LocalDateTime regDate;
@@ -37,11 +41,12 @@ public class Savings {
     private LocalDateTime updateDate;
 
     @Builder
-    public Savings(String userNumber, BigDecimal savings, SavingsStatus status, LocalDateTime nowDate, LocalDateTime updateDate){
+    public Savings(String userNumber, BigDecimal savings, SavingsStatus status, String remarks, LocalDateTime nowDate, LocalDateTime updateDate){
         this.userNumber = userNumber;
         this.defaultSavings = savings;
         this.remindSavings = savings;
         this.status = status;
+        this.remarks = remarks;
         this.expiredDate = nowDate.toLocalDate().plusYears(1L);
         this.updateDate = updateDate;
     }
@@ -51,6 +56,7 @@ public class Savings {
                 .userNumber(request.getUserNumber())
                 .savings(request.getSaveSavings())
                 .status(SavingsStatus.A)
+                .remarks(request.getRemarks())
                 .nowDate(LocalDateTime.now())
                 .build();
     }
@@ -63,6 +69,24 @@ public class Savings {
     }
 
     public boolean isMinusSavings() {
-        return this.defaultSavings.compareTo(BigDecimal.ZERO) < 0;
+        return this.defaultSavings.compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    public boolean isLessThanUseSavings(BigDecimal useSavings) {
+        return useSavings.compareTo(remindSavings) > 0;
+    }
+
+    public boolean isEqualsUseSavings(BigDecimal useSavings) {
+        return useSavings.compareTo(remindSavings) == 0;
+    }
+
+    public void end() {
+        this.remindSavings = BigDecimal.ZERO;
+        this.status = SavingsStatus.E;
+        this.updateDate = LocalDateTime.now();
+    }
+
+    public void deduct(BigDecimal useSavings) {
+        this.remindSavings = this.remindSavings.subtract(useSavings);
     }
 }
