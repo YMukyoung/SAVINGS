@@ -79,7 +79,6 @@ public class SavingsService {
         if(savings.isMinusSavings()){
             throw new SavingsSaveMinusException();
         }
-
         return savingsRepository.save(savings).toDto();
     }
     @Transactional
@@ -93,15 +92,14 @@ public class SavingsService {
             throw new AlreadyCanceledSavingsUseException();
         }
 
-        //차감 이력 조회
-        List<SavingsDeduction> savingsDeductions = getSavingsDeductionsBySavingsUse(savingsUse);
-
-        Map<Savings, BigDecimal> savingsInfo = new HashMap<>();
-        //차감 이력 취소 처리
-        cancelSavingsDeductions(savingsDeductions, savingsInfo);
-
         //사용 이력 취소 처리
         savingsUse.cancel(request.getCancelReason());
+
+        //차감 이력 조회
+        Map<Savings, BigDecimal> savingsInfo = new HashMap<>();
+        List<SavingsDeduction> savingsDeductions = getSavingsDeductionsBySavingsUse(savingsUse);
+        //차감 이력 취소 처리
+        cancelSavingsDeductions(savingsDeductions, savingsInfo);
 
         //적립 내역 조회
         Set<Savings> savingsSet = savingsInfo.keySet();
@@ -110,7 +108,6 @@ public class SavingsService {
                 .filter(savings -> !savings.isExpired())
                 .map(savings -> savings.recovery(savingsInfo.get(savings)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         return SavingsCancelDto.Response.create(savingsUseIdx, totalRecoverSavings);
     }
 
@@ -120,7 +117,6 @@ public class SavingsService {
         if(savingsDeductions == null){
             throw new EmptySavingsDeductionException();
         }
-
         return savingsDeductions;
     }
 
@@ -152,13 +148,11 @@ public class SavingsService {
     @Transactional(readOnly = true)
     public SavingsSumDto.Response findSavingsSum(String userNumber){
         BigDecimal totalSavings = getAvailableTotalSavings(userNumber);
-
         return SavingsSumDto.Response.createResponse(totalSavings);
     }
     @Transactional(readOnly = true)
     public BigDecimal getAvailableTotalSavings(String userNumber){
         BigDecimal sumSavings = savingsRepository.findSavingsSumByUser(userNumber);
-
         return sumSavings != null ? sumSavings : BigDecimal.ZERO;
     }
     @Transactional(readOnly = true)
@@ -167,7 +161,6 @@ public class SavingsService {
         if(availableSavings == null){
             throw new NotAvailableSavingsException();
         }
-
         return availableSavings;
     }
 }
