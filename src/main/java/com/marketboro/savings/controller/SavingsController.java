@@ -1,9 +1,6 @@
 package com.marketboro.savings.controller;
 
-import com.marketboro.savings.dto.SavingsHistoryDto;
-import com.marketboro.savings.dto.SavingsSaveDto;
-import com.marketboro.savings.dto.SavingsSumDto;
-import com.marketboro.savings.dto.SavingsUseDto;
+import com.marketboro.savings.dto.*;
 import com.marketboro.savings.dto.common.ApiResponse;
 import com.marketboro.savings.service.SavingsService;
 import lombok.RequiredArgsConstructor;
@@ -27,39 +24,35 @@ public class SavingsController {
      * 회원별 적립금 적립 내역 조회
      * */
     @GetMapping("/history/save/{userNumber}")
-    public ApiResponse<SavingsHistoryDto.SaveResponse> getSavingsSaveHistory(@PathVariable String userNumber
-                                                                     , Pageable pageable
-                                                                     ) {
+    public ApiResponse<SavingsHistoryDto.SaveResponse> getSavingsSaveHistory(@PathVariable String userNumber, Pageable pageable) {
         return ApiResponse.createSuccessResponse(savingsService.findAllSaveHistory(pageable, userNumber));
     }
     /**
      * 회원별 적립금 적립 내역 조회
      * */
     @GetMapping("/history/use/{userNumber}")
-    public ApiResponse<SavingsHistoryDto.UseResponse> getSavingsUseHistory(@PathVariable String userNumber
-                                                                     , Pageable pageable
-                                                                     ) {
+    public ApiResponse<SavingsHistoryDto.UseResponse> getSavingsUseHistory(@PathVariable String userNumber, Pageable pageable) {
         return ApiResponse.createSuccessResponse(savingsService.findAllUseHistory(pageable, userNumber));
     }
     /**
      * 회원별 적립금 적립
      * */
-    @PostMapping("/save")
-    public ApiResponse<SavingsSaveDto.Response> save(@RequestBody SavingsSaveDto.Request request){
+    @PostMapping("/save/{userNumber}")
+    public ApiResponse<SavingsSaveDto.Response> save(@PathVariable String userNumber, @RequestBody SavingsSaveDto.Request request){
         return ApiResponse.createSuccessResponse(savingsService.save(request));
     }
     /**
      * 회원별 적립금 사용
      * */
-    @PostMapping("/use")
-    public ApiResponse<SavingsUseDto.Response> use(@RequestBody SavingsUseDto.Request request){
-        return ApiResponse.createSuccessResponse(savingsService.use(request));
+    @PostMapping("/use/{userNumber}")
+    public ApiResponse<SavingsUseDto.Response> use(@PathVariable String userNumber, @RequestBody SavingsUseDto.Request request){
+        return ApiResponse.createSuccessResponse(savingsService.use(userNumber, request));
     }
     /**
      * 회원별 적립금 사용취소
      * */
-    @PostMapping("cancel")
-    public String cancel(@RequestBody String userNumber){
-        return "";
+    @PatchMapping("/cancel/{useSavingsIdx}")
+    public ApiResponse<SavingsCancelDto.Response> cancel(@PathVariable Long useSavingsIdx, @RequestBody SavingsCancelDto.Request request) {
+        return ApiResponse.createSuccessResponse(savingsService.cancel(useSavingsIdx, request));
     }
 }

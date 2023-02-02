@@ -47,10 +47,10 @@ public class SavingsUse {
         this.cancelDate = cancelDate;
     }
 
-    public static SavingsUse createSavingsUse(SavingsUseDto.Request request) {
+    public static SavingsUse createSavingsUse(String userNumber, SavingsUseDto.Request request) {
         return SavingsUse
                 .builder()
-                .userNumber(request.getUserNumber())
+                .userNumber(userNumber)
                 .useSavings(request.getUseSavings())
                 .remarks(request.getRemarks())
                 .cancelYn(Yn.N)

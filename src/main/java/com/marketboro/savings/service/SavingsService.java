@@ -1,9 +1,7 @@
 package com.marketboro.savings.service;
 
-import com.marketboro.savings.dto.SavingsHistoryDto;
-import com.marketboro.savings.dto.SavingsSaveDto;
-import com.marketboro.savings.dto.SavingsSumDto;
-import com.marketboro.savings.dto.SavingsUseDto;
+import com.marketboro.savings.dto.*;
+import com.marketboro.savings.dto.common.ApiResponse;
 import com.marketboro.savings.entity.savings.Savings;
 import com.marketboro.savings.entity.savings.SavingsDeduction;
 import com.marketboro.savings.entity.savings.SavingsUse;
@@ -32,26 +30,26 @@ public class SavingsService {
     private final SavingsUseRepository savingsUseRepository;
     private final SavingsDeductionRepository savingsDeductionRepository;
 
-    public SavingsUseDto.Response use(SavingsUseDto.Request request) {
+    public SavingsUseDto.Response use(String userNumber, SavingsUseDto.Request request) {
         BigDecimal useSavings = request.getUseSavings();
         if(useSavings.compareTo(BigDecimal.ZERO) <= 0){
             throw new SavingsUseMinusException();
         }
-        BigDecimal availableTotalSavings = getAvailableTotalSavings(request.getUserNumber());
+        BigDecimal availableTotalSavings = getAvailableTotalSavings(userNumber);
         if(useSavings.compareTo(availableTotalSavings) > 0){
             throw new LackSavingsException();
         }
         //사용 가능한 적립금 조회
-        List<Savings> savings = getAvailableSavings(request.getUserNumber());
+        List<Savings> savings = getAvailableSavings(userNumber);
         //적립금 사용 이력 적재
-        SavingsUse savingsUse = saveSavingsUse(request);
+        SavingsUse savingsUse = saveSavingsUse(userNumber, request);
         //적립금에서 적립금 차감
         deductionsSavings(savings, savingsUse, useSavings);
 
-        return SavingsUseDto.Response.from(request.getUseSavings());
+        return SavingsUseDto.Response.from(savingsUse);
     }
-    public SavingsUse saveSavingsUse(SavingsUseDto.Request request) {
-        SavingsUse savingsUse = SavingsUse.createSavingsUse(request);
+    public SavingsUse saveSavingsUse(String userNumber, SavingsUseDto.Request request) {
+        SavingsUse savingsUse = SavingsUse.createSavingsUse(userNumber, request);
         return savingsUseRepository.save(savingsUse);
     }
     public void deductionsSavings(List<Savings> savingsList, SavingsUse savingsUse, BigDecimal useSavings) {
@@ -119,5 +117,9 @@ public class SavingsService {
         }
 
         return availableSavings;
+    }
+
+    public SavingsCancelDto.Response cancel(Long useSavingsIdx, SavingsCancelDto.Request request) {
+        return null;
     }
 }
