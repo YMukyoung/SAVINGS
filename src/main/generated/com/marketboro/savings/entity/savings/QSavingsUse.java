@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -30,6 +31,8 @@ public class QSavingsUse extends EntityPathBase<SavingsUse> {
     public final DateTimePath<java.time.LocalDateTime> regDate = createDateTime("regDate", java.time.LocalDateTime.class);
 
     public final StringPath remarks = createString("remarks");
+
+    public final ListPath<SavingsDeduction, QSavingsDeduction> savingsDeductions = this.<SavingsDeduction, QSavingsDeduction>createList("savingsDeductions", SavingsDeduction.class, QSavingsDeduction.class, PathInits.DIRECT2);
 
     public final StringPath userNumber = createString("userNumber");
 

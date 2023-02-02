@@ -1,6 +1,6 @@
 package com.marketboro.savings.repository.impl;
 
-import com.marketboro.savings.config.OrderByNull;
+import com.marketboro.savings.querydsl.OrderByNull;
 import com.marketboro.savings.dto.QSavingsHistoryDto_SaveResponse_SaveHistory;
 import com.marketboro.savings.dto.SavingsHistoryDto;
 import com.marketboro.savings.enums.SavingsStatus;

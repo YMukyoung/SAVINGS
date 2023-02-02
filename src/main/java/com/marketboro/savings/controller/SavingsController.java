@@ -39,7 +39,7 @@ public class SavingsController {
      * */
     @PostMapping("/save/{userNumber}")
     public ApiResponse<SavingsSaveDto.Response> save(@PathVariable String userNumber, @RequestBody SavingsSaveDto.Request request){
-        return ApiResponse.createSuccessResponse(savingsService.save(request));
+        return ApiResponse.createSuccessResponse(savingsService.save(userNumber, request));
     }
     /**
      * 회원별 적립금 사용
@@ -51,8 +51,8 @@ public class SavingsController {
     /**
      * 회원별 적립금 사용취소
      * */
-    @PatchMapping("/cancel/{useSavingsIdx}")
-    public ApiResponse<SavingsCancelDto.Response> cancel(@PathVariable Long useSavingsIdx, @RequestBody SavingsCancelDto.Request request) {
-        return ApiResponse.createSuccessResponse(savingsService.cancel(useSavingsIdx, request));
+    @PatchMapping("/cancel/{savingsUseIdx}")
+    public ApiResponse<SavingsCancelDto.Response> cancel(@PathVariable Long savingsUseIdx, @RequestBody SavingsCancelDto.Request request) {
+        return ApiResponse.createSuccessResponse(savingsService.cancel(savingsUseIdx, request));
     }
 }

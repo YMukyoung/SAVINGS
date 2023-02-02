@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -30,6 +31,8 @@ public class QSavings extends EntityPathBase<Savings> {
     public final StringPath remarks = createString("remarks");
 
     public final NumberPath<java.math.BigDecimal> remindSavings = createNumber("remindSavings", java.math.BigDecimal.class);
+
+    public final ListPath<SavingsDeduction, QSavingsDeduction> savingsDeductions = this.<SavingsDeduction, QSavingsDeduction>createList("savingsDeductions", SavingsDeduction.class, QSavingsDeduction.class, PathInits.DIRECT2);
 
     public final EnumPath<com.marketboro.savings.enums.SavingsStatus> status = createEnum("status", com.marketboro.savings.enums.SavingsStatus.class);
 

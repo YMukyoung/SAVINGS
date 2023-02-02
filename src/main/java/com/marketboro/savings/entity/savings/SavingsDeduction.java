@@ -4,12 +4,14 @@ import com.marketboro.savings.entity.common.Yn;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "SAVINGS_DEDUCTION")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,10 +21,10 @@ public class SavingsDeduction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SAVINGS_IDX", columnDefinition = "Long", nullable = false)
     private Savings savings;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SAVINGS_USE_IDX", columnDefinition = "Long", nullable = false)
     private SavingsUse savingsUse;
     @Column(name = "USER_NUMBER", nullable = false)

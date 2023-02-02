@@ -1,4 +1,4 @@
-package com.marketboro.savings.config;
+package com.marketboro.savings.querydsl;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;

@@ -5,10 +5,7 @@ import com.marketboro.savings.dto.common.ApiResponse;
 import com.marketboro.savings.entity.savings.Savings;
 import com.marketboro.savings.entity.savings.SavingsDeduction;
 import com.marketboro.savings.entity.savings.SavingsUse;
-import com.marketboro.savings.exceptions.NotAvailableSavingsException;
-import com.marketboro.savings.exceptions.LackSavingsException;
-import com.marketboro.savings.exceptions.SavingsSaveMinusException;
-import com.marketboro.savings.exceptions.SavingsUseMinusException;
+import com.marketboro.savings.exceptions.*;
 import com.marketboro.savings.repository.SavingsDeductionRepository;
 import com.marketboro.savings.repository.SavingsRepository;
 import com.marketboro.savings.repository.SavingsUseRepository;
@@ -19,8 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -78,13 +74,69 @@ public class SavingsService {
 
         savingsDeductionRepository.saveAll(savingsDeductionsForSave);
     }
-    public SavingsSaveDto.Response save(SavingsSaveDto.Request request) {
-        Savings savings = Savings.createSavingForSave(request);
+    public SavingsSaveDto.Response save(String userNumber, SavingsSaveDto.Request request) {
+        Savings savings = Savings.createSavingForSave(userNumber, request);
         if(savings.isMinusSavings()){
             throw new SavingsSaveMinusException();
         }
 
         return savingsRepository.save(savings).toDto();
+    }
+    @Transactional
+    public SavingsCancelDto.Response cancel(Long savingsUseIdx, SavingsCancelDto.Request request) {
+        //취소할 사용 이력 조회
+        SavingsUse savingsUse = savingsUseRepository.findByIdx(savingsUseIdx)
+                .orElseThrow(EmptySavingsUseException::new);
+
+        //이미 취소된 건에 대한 예외 처리
+        if(savingsUse.isCanceled()){
+            throw new AlreadyCanceledSavingsUseException();
+        }
+
+        //차감 이력 조회
+        List<SavingsDeduction> savingsDeductions = getSavingsDeductionsBySavingsUse(savingsUse);
+
+        Map<Savings, BigDecimal> savingsInfo = new HashMap<>();
+        //차감 이력 취소 처리
+        cancelSavingsDeductions(savingsDeductions, savingsInfo);
+
+        //사용 이력 취소 처리
+        savingsUse.cancel(request.getCancelReason());
+
+        //적립 내역 조회
+        Set<Savings> savingsSet = savingsInfo.keySet();
+        //차감 적립금 복구 처리
+        BigDecimal totalRecoverSavings = savingsSet.stream()
+                .filter(savings -> !savings.isExpired())
+                .map(savings -> savings.recovery(savingsInfo.get(savings)))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return SavingsCancelDto.Response.create(savingsUseIdx, totalRecoverSavings);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SavingsDeduction> getSavingsDeductionsBySavingsUse(SavingsUse savingsUse) {
+        List<SavingsDeduction> savingsDeductions = savingsDeductionRepository.findAllBySavingsUse(savingsUse);
+        if(savingsDeductions == null){
+            throw new EmptySavingsDeductionException();
+        }
+
+        return savingsDeductions;
+    }
+
+    public void cancelSavingsDeductions(List<SavingsDeduction> savingsDeductions, Map<Savings, BigDecimal> savingsInfo){
+        List<Long> savingsDeductionsIndex = new ArrayList<>();
+        for (SavingsDeduction savingsDeduction : savingsDeductions) {
+            savingsDeductionsIndex.add(savingsDeduction.getIdx());
+
+            Savings savings = savingsDeduction.getSavings();
+            BigDecimal currentDeductionSavings =  savingsDeduction.getDeductionSavings();
+            BigDecimal totalDeductionSavings = savingsInfo.getOrDefault(savings, BigDecimal.ZERO);
+            totalDeductionSavings = totalDeductionSavings.add(currentDeductionSavings);
+            savingsInfo.put(savingsDeduction.getSavings(), totalDeductionSavings);
+        }
+
+        savingsDeductionRepository.cancelSavingsDeduction(savingsDeductionsIndex);
     }
     @Transactional(readOnly = true)
     public SavingsHistoryDto.SaveResponse findAllSaveHistory(Pageable pageable, String userNumber) {
@@ -117,9 +169,5 @@ public class SavingsService {
         }
 
         return availableSavings;
-    }
-
-    public SavingsCancelDto.Response cancel(Long useSavingsIdx, SavingsCancelDto.Request request) {
-        return null;
     }
 }

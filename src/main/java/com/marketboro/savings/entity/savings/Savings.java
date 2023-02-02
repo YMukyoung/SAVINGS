@@ -10,6 +10,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "SAVINGS")
@@ -40,6 +42,8 @@ public class Savings {
     @Column(name = "UPDATE_DATE")
     private LocalDateTime updateDate;
 
+    @OneToMany(mappedBy = "savings")
+    private List<SavingsDeduction> savingsDeductions;
     @Builder
     public Savings(String userNumber, BigDecimal savings, SavingsStatus status, String remarks, LocalDateTime nowDate, LocalDateTime updateDate){
         this.userNumber = userNumber;
@@ -51,9 +55,9 @@ public class Savings {
         this.updateDate = updateDate;
     }
 
-    public static Savings createSavingForSave(SavingsSaveDto.Request request) {
+    public static Savings createSavingForSave(String userNumber, SavingsSaveDto.Request request) {
         return Savings.builder()
-                .userNumber(request.getUserNumber())
+                .userNumber(userNumber)
                 .savings(request.getSaveSavings())
                 .status(SavingsStatus.A)
                 .remarks(request.getRemarks())
@@ -88,5 +92,15 @@ public class Savings {
 
     public void deduct(BigDecimal useSavings) {
         this.remindSavings = this.remindSavings.subtract(useSavings);
+    }
+
+    public boolean isExpired() {
+        return this.expiredDate.isBefore(LocalDate.now());
+    }
+
+    public BigDecimal recovery(BigDecimal rollbackSavings) {
+        this.status = SavingsStatus.A;
+        this.remindSavings = this.remindSavings.add(rollbackSavings);
+        return rollbackSavings;
     }
 }

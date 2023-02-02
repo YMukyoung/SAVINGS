@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 public class SavingsSaveDto {
     @Getter
     public static class Request{
-        private String userNumber;
         private BigDecimal saveSavings;
         private String remarks;
     }
