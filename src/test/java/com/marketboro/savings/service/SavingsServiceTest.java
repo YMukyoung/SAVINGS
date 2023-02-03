@@ -7,8 +7,4 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class SavingsServiceTest {
-    @Test
-    void 적립금_차감(){
-
-    }
 }
